@@ -10,3 +10,5 @@ export const postRegister = async (
     await user.save();
     return res.json({ message: 'User saved' });
 };
+
+// DELETE
