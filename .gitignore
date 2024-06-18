@@ -1,0 +1,15 @@
+# Dependencias instaladas con npm
+/node_modules
+
+# Archivos o directorios generados
+npm-debug.log
+yarn-error.log
+/dist
+*.pem
+
+# Variables de entorno
+.env
+
+# Otros
+.DS_Store
+Thumbs.db
