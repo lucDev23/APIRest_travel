@@ -2,7 +2,10 @@ import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import User from './models/User';
 import authRoutes from './routes/auth';
+import adminRoutes from './routes/admin';
 import cors from 'cors';
+import passport from 'passport';
+import './config/passport';
 
 const app = express();
 
@@ -12,8 +15,10 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(passport.initialize());
 
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
 
 // ERROR HANDLER
 

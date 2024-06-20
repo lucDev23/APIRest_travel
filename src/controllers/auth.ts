@@ -1,17 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
-import { validationResult } from 'express-validator';
+import { Result, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 import User from '../models/User';
-import { IUser } from '../interfaces/IUser';
 
-export const postSignup = async (
+const SECRET_KEY = 'secret_key';
+
+export const signup = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    const errors = validationResult(req);
+    const errors: Result = validationResult(req);
 
     if (!errors.isEmpty()) {
         const error = new Error(errors.array()[0].msg);
@@ -19,8 +20,7 @@ export const postSignup = async (
         return next(error);
     }
 
-    const email = req.body.email;
-    const password = req.body.password;
+    const { email, password } = req.body as { email: string; password: string };
 
     try {
         const hashedPassword = await bcrypt.hash(password, 12);
@@ -41,27 +41,26 @@ export const postSignup = async (
     }
 };
 
-export const postLogin = async (
+export const login = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    const errors = validationResult(req);
+    const errors: Result = validationResult(req);
 
     if (!errors.isEmpty()) {
-        const error = new Error(errors.array()[0].msg);
+        const error: Error = new Error(errors.array()[0].msg);
         res.status(422);
         return next(error);
     }
 
-    const email = req.body.email;
-    const password = req.body.password;
+    const { email, password } = req.body as { email: string; password: string };
 
     try {
         const user = await User.findOne({ email: email });
 
         if (!user) {
-            const error = new Error(
+            const error: Error = new Error(
                 'A user with this email could not be found.'
             );
             res.status(401);
@@ -71,14 +70,24 @@ export const postLogin = async (
         const passwordsMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordsMatch) {
-            const error = new Error('Wrong password.');
+            const error: Error = new Error('Wrong password.');
             res.status(401);
             return next(error);
         }
 
-        return res.status(200).json({ message: 'Login successful' });
+        const payload = { _id: user._id };
+        const token: string = jwt.sign(payload, SECRET_KEY, {
+            expiresIn: '1h',
+        });
+        return res
+            .status(200)
+            .json({ message: 'successfully logged in', token });
     } catch (error) {
         res.status(500);
         return next(error);
     }
+};
+
+export const test = (req: Request, res: Response, next: NextFunction) => {
+    return res.json({ message: 'ok' });
 };
