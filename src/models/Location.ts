@@ -7,6 +7,8 @@ const locationSchema: Schema<ILocation> = new Schema({
 
 export const Location = mongoose.model<ILocation>('Location', locationSchema);
 
-export const existsLocation = (location: string): boolean => {
-    return Location.exists({ name: location }) === null ? false : true;
+export const existsLocation = async (location: string): Promise<boolean> => {
+    const exists =
+        (await Location.exists({ name: location })) === null ? false : true;
+    return exists;
 };

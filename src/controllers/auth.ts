@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { Result, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
 import User from '../models/User';
+import { CustomValidationError } from '../types/CustomValidationError';
 
 const SECRET_KEY = 'secret_key';
 
@@ -15,7 +15,7 @@ export const signup = async (
     const errors: Result = validationResult(req);
 
     if (!errors.isEmpty()) {
-        const error = new Error(errors.array()[0].msg);
+        const error = new CustomValidationError(errors.array());
         res.status(422);
         return next(error);
     }
@@ -49,7 +49,7 @@ export const login = async (
     const errors: Result = validationResult(req);
 
     if (!errors.isEmpty()) {
-        const error: Error = new Error(errors.array()[0].msg);
+        const error = new CustomValidationError(errors.array());
         res.status(422);
         return next(error);
     }

@@ -6,6 +6,7 @@ import adminRoutes from './routes/admin';
 import cors from 'cors';
 import passport from 'passport';
 import './config/passport';
+import { CustomValidationError } from './types/CustomValidationError';
 
 const app = express();
 
@@ -17,15 +18,32 @@ app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
 
+// Test
+
+// import { Location } from './models/Location';
+// const createLocation = async () => {
+//     const location = new Location({ name: 'Dolores' });
+//     await location.save();
+// };
+
+// createLocation();
+
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 
 // ERROR HANDLER
 
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-    console.log(error.message);
-    return res.json({ message: error.message });
-});
+app.use(
+    (
+        error: CustomValidationError,
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        console.log(error.errors);
+        return res.json({ error: error.message, errors: error.errors });
+    }
+);
 
 mongoose
     .connect(MONGODB_URI)
