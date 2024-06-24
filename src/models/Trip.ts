@@ -6,6 +6,7 @@ const tripSchema: Schema<ITrip> = new Schema({
     arrivalDate: { type: Date, required: true },
     origin: { type: String, required: true },
     destination: { type: String, required: true },
+    middleDestinations: [{ type: Schema.Types.ObjectId, ref: 'Location' }],
     bus: { type: Schema.Types.ObjectId, ref: 'Bus', required: true },
 });
 

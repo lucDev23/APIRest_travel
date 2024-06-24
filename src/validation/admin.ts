@@ -16,11 +16,24 @@ export const validateTripInputs: ValidationChain[] = [
         .isISO8601()
         .withMessage('Arrival date must be in date format (ISO8601)'),
 
-    body('origin').custom((origin) => validLocation(origin, 'Origin')),
+    body('origin')
+        .notEmpty()
+        .withMessage('Origin location is required')
+        .custom((origin) => validLocation(origin)),
 
-    body('destination').custom((destination) =>
-        validLocation(destination, 'Destination')
-    ),
+    body('destination')
+        .notEmpty()
+        .withMessage('Destination location is required')
+        .custom((destination) => validLocation(destination)),
+
+    body('middleDestinations').custom((middleDestinations) => {
+        if (middleDestinations) {
+            middleDestinations.forEach((e: string) => {
+                validLocation(e);
+            });
+        }
+        return true;
+    }),
 
     body('bus')
         .notEmpty()
@@ -47,6 +60,4 @@ export const validTrip = async (
         destination: destination,
         bus: bus,
     });
-
-    // FIX if ()
 };
