@@ -13,14 +13,6 @@ export const createTrip = async (
     res: Response,
     next: NextFunction
 ) => {
-    const errors: Result = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        const error = new CustomValidationError(errors.array());
-        res.status(422);
-        return next(error);
-    }
-
     const { departureDate, arrivalDate, origin, destination, bus } =
         req.body as {
             departureDate: string;
@@ -29,4 +21,6 @@ export const createTrip = async (
             destination: string;
             bus: string;
         };
+
+    return res.json({ message: 'ok' });
 };

@@ -12,13 +12,13 @@ export const signup = async (
     res: Response,
     next: NextFunction
 ) => {
-    const errors: Result = validationResult(req);
+    // const errors: Result = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        const error = new CustomValidationError(errors.array());
-        res.status(422);
-        return next(error);
-    }
+    // if (!errors.isEmpty()) {
+    //     const error = new CustomValidationError(errors.array());
+    //     res.status(422);
+    //     return next(error);
+    // }
 
     const { email, password } = req.body as { email: string; password: string };
 
@@ -46,13 +46,13 @@ export const login = async (
     res: Response,
     next: NextFunction
 ) => {
-    const errors: Result = validationResult(req);
+    // const errors: Result = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        const error = new CustomValidationError(errors.array());
-        res.status(422);
-        return next(error);
-    }
+    // if (!errors.isEmpty()) {
+    //     const error = new CustomValidationError(errors.array());
+    //     res.status(422);
+    //     return next(error);
+    // }
 
     const { email, password } = req.body as { email: string; password: string };
 

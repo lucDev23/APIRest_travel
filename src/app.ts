@@ -28,6 +28,14 @@ app.use(passport.initialize());
 
 // createLocation();
 
+// import Bus from './models/Bus';
+// const createBus = async () => {
+//     const bus = new Bus({ capacity: 10 });
+//     await bus.save();
+// };
+
+// createBus();
+
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 
@@ -40,7 +48,6 @@ app.use(
         res: Response,
         next: NextFunction
     ) => {
-        console.log(error.errors);
         return res.json({ error: error.message, errors: error.errors });
     }
 );

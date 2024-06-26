@@ -1,8 +1,6 @@
 import express, { Request } from 'express';
 import * as adminController from '../controllers/admin';
-import { body } from 'express-validator';
 import passport, { authenticate } from 'passport';
-import { validLocation } from '../helpers/validation';
 import { validateTripInputs } from '../validation/admin';
 
 const router = express.Router();
