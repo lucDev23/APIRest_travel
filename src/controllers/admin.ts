@@ -3,8 +3,6 @@ import { Result, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-import Trip from '../models/Trip';
-import Bus from '../models/Bus';
 import { Location } from '../models/Location';
 import { CustomValidationError } from '../types/CustomValidationError';
 
@@ -13,14 +11,12 @@ export const createTrip = async (
     res: Response,
     next: NextFunction
 ) => {
-    const { departureDate, arrivalDate, origin, destination, bus } =
-        req.body as {
-            departureDate: string;
-            arrivalDate: string;
-            origin: string;
-            destination: string;
-            bus: string;
-        };
+    const departureDate: string = req.body.departureDate;
+    const arrivalDate: string = req.body.arrivalDate;
+    const origin: string = req.body.origin;
+    const destination: string = req.body.destination;
+    const middleDestinations: string[] = req.body.middleDestinations;
+    const busId: string = req.body.busId;
 
     return res.json({ message: 'ok' });
 };

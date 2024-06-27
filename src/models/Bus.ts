@@ -6,4 +6,9 @@ const busSchema: Schema<IBus> = new Schema({
     trips: [{ type: Schema.Types.ObjectId, ref: 'Trip' }],
 });
 
-export default mongoose.model<IBus>('Bus', busSchema);
+export const Bus = mongoose.model<IBus>('Bus', busSchema);
+
+export const existsBus = async (busId: string): Promise<boolean> => {
+    const exists = (await Bus.exists({ _id: busId })) === null ? false : true;
+    return exists;
+};
