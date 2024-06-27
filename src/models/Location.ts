@@ -12,3 +12,18 @@ export const existsLocation = async (location: string): Promise<boolean> => {
         (await Location.exists({ name: location })) === null ? false : true;
     return exists;
 };
+
+export const existsAllLocations = async (
+    locations: string[]
+): Promise<string[]> => {
+    const invalidLocations: string[] = [];
+
+    for (const location of locations) {
+        const exist = await Location.exists({ name: location });
+        if (!exist) {
+            invalidLocations.push(location);
+        }
+    }
+
+    return invalidLocations;
+};

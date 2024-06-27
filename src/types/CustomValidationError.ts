@@ -11,7 +11,7 @@ export class CustomValidationError extends Error {
 
     addError(value: string | undefined, msg: string, path: string): void {
         this.errors?.push({
-            value: value !== undefined ? value : null,
+            value: value || null,
             msg: msg,
             path: path,
         });
