@@ -61,10 +61,11 @@ export const connectLocations = async (
 
     // await insertEdge(locationOne, locationTwo);
 
-    const connect = await isLocationInBetween('Dolores', 'Montevideo', [
-        'Ombues',
-        'Colonia',
-    ]);
+    const connect = await isLocationInBetween(
+        'Dolores',
+        'Montevideo',
+        'Ombues'
+    );
 
     return res.json({ message: connect /* message: 'ok' */ });
 };
