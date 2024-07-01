@@ -9,6 +9,10 @@ router.post('/trips', validateTripInputs, adminController.createTrip);
 
 router.put('/trips/:tripId' /*, adminController.editTrip */);
 
+router.post('/locations', adminController.addLocation);
+
+router.post('/locations/connect', adminController.connectLocations);
+
 router.delete('/trips/:tripId' /*, adminController.deleteTrip */);
 
 router.post('/bus' /*, adminController.addBus */);
