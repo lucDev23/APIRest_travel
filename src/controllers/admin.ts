@@ -3,10 +3,11 @@ import { Result, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-import { Location, isLocationInBetween } from '../models/Location';
+import { insertLocation } from '../models/Location';
 import { CustomValidationError } from '../types/CustomValidationError';
 import { Trip } from '../models/Trip';
 import { insertEdge } from '../models/Edge';
+import { insertBus } from '../models/Bus';
 
 export const createTrip = async (
     req: Request,
@@ -20,15 +21,6 @@ export const createTrip = async (
     const middleDestinations: string[] = req.body.middleDestinations;
     const busId: string = req.body.busId;
 
-    const trip = new Trip({
-        departureDate: departureDate,
-        arrivalDate: arrivalDate,
-        origin: origin,
-        destination: destination,
-        middleDestinations: middleDestinations,
-        busId: busId,
-    });
-
     return res.json({ message: 'ok' });
 };
 
@@ -37,18 +29,12 @@ export const addLocation = async (
     res: Response,
     next: NextFunction
 ) => {
-    const errors: CustomValidationError = new CustomValidationError();
-
-    const name = req.body.locationName;
-
-    if (!(await Location.exists({ name: name }))) {
-        const location = new Location({ name: name });
-        await location.save();
-    } else {
-        return res.json({ message: 'Location duplicated' });
+    try {
+        await insertLocation(req.body.locationName);
+        return res.status(200).json({ message: 'Location added successfully' });
+    } catch (error) {
+        return next(error);
     }
-
-    return res.json({ message: 'ok' });
 };
 
 export const connectLocations = async (
@@ -56,16 +42,34 @@ export const connectLocations = async (
     res: Response,
     next: NextFunction
 ) => {
-    // const locationOne = req.body.locationOne;
-    // const locationTwo = req.body.locationTwo;
+    const locationOne = req.body.locationOne;
+    const locationTwo = req.body.locationTwo;
 
-    // await insertEdge(locationOne, locationTwo);
+    const errors: CustomValidationError = new CustomValidationError();
+    try {
+        if (errors.errors.length > 0) {
+            res.status(422);
+            return next(errors);
+        }
 
-    const connect = await isLocationInBetween(
-        'Dolores',
-        'Montevideo',
-        'Ombues'
-    );
+        await insertEdge(locationOne, locationTwo);
+        return res
+            .status(200)
+            .json({ message: 'Conneetion added successfully' });
+    } catch (error) {
+        return next(error);
+    }
+};
 
-    return res.json({ message: connect /* message: 'ok' */ });
+export const addBus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        await insertBus(req.body.busCapacity);
+        return res.status(200).json({ message: 'Bus added successfully' });
+    } catch (error) {
+        return next(error);
+    }
 };

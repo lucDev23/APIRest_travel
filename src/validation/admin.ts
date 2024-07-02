@@ -3,8 +3,14 @@ import { Trip } from '../models/Trip';
 import { Request, Response, NextFunction } from 'express';
 import { CustomValidationError } from '../types/CustomValidationError';
 import validator from 'validator';
-import { existsAllLocations, existsLocation } from '../models/Location';
+import {
+    existsAllLocations,
+    existsLocation,
+    validateMiddleLocations,
+} from '../models/Location';
 import { validDate } from '../helpers/validDate';
+import { Location } from '../models/Location';
+import { Edge } from '../models/Edge';
 
 export const validateTripInputs = async (
     req: Request,
@@ -30,13 +36,6 @@ export const validateTripInputs = async (
     const busId: string = validator.trim(req.body.busId || '');
 
     const errors: CustomValidationError = new CustomValidationError();
-
-    req.body.origin = origin;
-    req.body.destination = destination;
-    req.body.middleDestinations = middleDestinations;
-    req.body.departureDate = departureDate;
-    req.body.arrivalDate = arrivalDate;
-    req.body.busId = busId;
 
     if (!origin) {
         errors.addError(origin, 'Origin is required', 'origin');
@@ -96,6 +95,20 @@ export const validateTripInputs = async (
                     );
                 });
             }
+
+            if (
+                !(await validateMiddleLocations(
+                    origin,
+                    destination,
+                    middleDestinations
+                ))
+            ) {
+                errors.addError(
+                    middleDestinations,
+                    'Some Middle location is not connected',
+                    'middleLocations'
+                );
+            }
         } catch (error) {
             return next(error);
         }
@@ -154,6 +167,157 @@ export const validateTripInputs = async (
         res.status(422);
         return next(errors);
     }
+
+    req.body.origin = origin;
+    req.body.destination = destination;
+    req.body.middleDestinations = middleDestinations;
+    req.body.departureDate = departureDate;
+    req.body.arrivalDate = arrivalDate;
+    req.body.busId = busId;
+
+    return next();
+};
+
+export const validateLocationsInputs = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const locationName: string = validator.trim(req.body.locationName || '');
+
+    const errors: CustomValidationError = new CustomValidationError();
+
+    if (!locationName) {
+        errors.addError(
+            locationName,
+            'Location name is required',
+            'locationName'
+        );
+    }
+
+    try {
+        if (await Location.exists({ name: locationName })) {
+            errors.addError(
+                locationName,
+                'Location name arredy exists',
+                'locationName'
+            );
+        }
+    } catch (error) {
+        return next(error);
+    }
+
+    if (errors.errors.length > 0) {
+        res.status(422);
+        return next(errors);
+    }
+
+    req.body.locationName = locationName;
+
+    return next();
+};
+
+export const validateConnectionInputs = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const locationOne: string = validator.trim(req.body.locationOne || '');
+    const locationTwo: string = validator.trim(req.body.locationTwo || '');
+
+    const errors: CustomValidationError = new CustomValidationError();
+
+    if (!locationOne) {
+        errors.addError(locationOne, 'Location one is required', 'locationOne');
+    }
+
+    try {
+        if (locationOne && !(await Location.exists({ name: locationOne }))) {
+            errors.addError(
+                locationOne,
+                'Location one name does not exists',
+                'locationOne'
+            );
+        }
+    } catch (error) {
+        return next(error);
+    }
+
+    if (!locationTwo) {
+        errors.addError(locationTwo, 'Location two is required', 'locationTwo');
+    }
+
+    try {
+        if (locationTwo && !(await Location.exists({ name: locationTwo }))) {
+            errors.addError(
+                locationTwo,
+                'Location two name does not exists',
+                'locationTwo'
+            );
+        }
+    } catch (error) {
+        return next(error);
+    }
+
+    try {
+        if (
+            await Edge.exists({
+                startLocation: locationOne,
+                endLocation: locationTwo,
+            })
+        ) {
+            errors.addError(
+                [locationOne, locationTwo],
+                'Connection between locations already exists',
+                'locationOne, locationTwo'
+            );
+        }
+    } catch (error) {
+        return next(error);
+    }
+
+    if (errors.errors.length > 0) {
+        res.status(422);
+        return next(errors);
+    }
+
+    req.body.locationOne = locationOne;
+    req.body.locationTwo = locationTwo;
+
+    return next();
+};
+
+export const validateBusInputs = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const busCapacity: string = validator.trim(req.body.busCapacity || '');
+
+    const errors: CustomValidationError = new CustomValidationError();
+
+    if (!busCapacity) {
+        errors.addError(busCapacity, 'Bus capacity is required', 'busCapacity');
+    }
+
+    try {
+        if (busCapacity && !validator.isNumeric(busCapacity)) {
+            errors.addError(
+                busCapacity,
+                'Bus capacity must be a numeric value',
+                'busCapacity'
+            );
+        }
+    } catch (error) {
+        return next(error);
+    }
+
+    if (errors.errors.length > 0) {
+        res.status(422);
+        return next(errors);
+    }
+
+    req.body.busCapacity = Number(busCapacity);
 
     return next();
 };

@@ -85,3 +85,22 @@ export const isLocationInBetween = async (
 
     return false;
 };
+
+export const validateMiddleLocations = async (
+    startLocation: string,
+    endLocation: string,
+    middleDestinations: string[]
+): Promise<boolean> => {
+    try {
+        const validationResults = await Promise.all(
+            middleDestinations.map((destination) =>
+                isLocationInBetween(startLocation, endLocation, destination)
+            )
+        );
+
+        return validationResults.every((result) => result === true);
+    } catch (error) {
+        console.error('Error validating middle locations:', error);
+        return false;
+    }
+};

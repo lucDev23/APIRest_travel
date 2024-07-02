@@ -18,24 +18,6 @@ app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
 
-// Test
-
-// import { Location } from './models/Location';
-// const createLocation = async () => {
-//     const location = new Location({ name: 'Dolores' });
-//     await location.save();
-// };
-
-// createLocation();
-
-// import Bus from './models/Bus';
-// const createBus = async () => {
-//     const bus = new Bus({ capacity: 10 });
-//     await bus.save();
-// };
-
-// createBus();
-
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 

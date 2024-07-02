@@ -8,7 +8,16 @@ const busSchema: Schema<IBus> = new Schema({
 
 export const Bus = mongoose.model<IBus>('Bus', busSchema);
 
+export const insertBus = async (capacity: number): Promise<IBus> => {
+    const bus = new Bus({ capacity });
+    await bus.save();
+    return bus;
+};
+
 export const existsBus = async (busId: string): Promise<boolean> => {
     const exists = (await Bus.exists({ _id: busId })) === null ? false : true;
     return exists;
 };
+
+// FIX
+// export const availableBus = async (busId)

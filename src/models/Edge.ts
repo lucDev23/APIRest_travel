@@ -16,6 +16,11 @@ export const insertEdge = async (
         startLocation: startLocation,
         endLocation: endLocation,
     });
+    const edgeTwo = new Edge({
+        startLocation: endLocation,
+        endLocation: startLocation,
+    });
     await edge.save();
+    await edgeTwo.save();
     return edge;
 };

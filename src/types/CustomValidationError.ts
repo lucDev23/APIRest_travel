@@ -1,6 +1,6 @@
 export class CustomValidationError extends Error {
     errors: {
-        value: string | undefined | null;
+        value: string | string[] | undefined | null;
         msg: string;
         path: string;
     }[];
@@ -9,7 +9,11 @@ export class CustomValidationError extends Error {
         this.errors = [];
     }
 
-    addError(value: string | undefined, msg: string, path: string): void {
+    addError(
+        value: string | string[] | undefined,
+        msg: string,
+        path: string
+    ): void {
         this.errors?.push({
             value: value || null,
             msg: msg,
