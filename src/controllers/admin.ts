@@ -19,7 +19,13 @@ export const testGraph = async (
     const graph = new LocationGraph();
     await graph.init();
     graph.print();
-    console.log(graph.bfs('Dolores', 'Colonia', ['Ombues']));
+    console.log(
+        await graph.findShortestPathWithIntermediates(
+            'Dolores',
+            'Montevideo',
+            []
+        )
+    );
 
     res.json({ message: 'ok' });
 };
