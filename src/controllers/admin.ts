@@ -3,11 +3,26 @@ import { Result, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-import { insertLocation } from '../models/Location';
+import { insertLocation, Location } from '../models/Location';
 import { CustomValidationError } from '../types/CustomValidationError';
-import { Trip } from '../models/Trip';
-import { insertEdge } from '../models/Edge';
+import { Trip, insertTrip } from '../models/Trip';
+import { Edge, insertEdge } from '../models/Edge';
 import { insertBus } from '../models/Bus';
+import { IEdge } from '../interfaces/IEdge';
+import { LocationGraph } from '../types/LocationsGraph';
+
+export const testGraph = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const graph = new LocationGraph();
+    await graph.init();
+    graph.print();
+    console.log(graph.bfs('Dolores', 'Colonia', ['Ombues']));
+
+    res.json({ message: 'ok' });
+};
 
 export const createTrip = async (
     req: Request,
@@ -21,7 +36,16 @@ export const createTrip = async (
     const middleDestinations: string[] = req.body.middleDestinations;
     const busId: string = req.body.busId;
 
-    return res.json({ message: 'ok' });
+    await insertTrip(
+        departureDate,
+        arrivalDate,
+        origin,
+        destination,
+        middleDestinations,
+        busId
+    );
+
+    return res.status(200).json({ message: 'Trip created successfully' });
 };
 
 export const addLocation = async (
@@ -44,18 +68,13 @@ export const connectLocations = async (
 ) => {
     const locationOne = req.body.locationOne;
     const locationTwo = req.body.locationTwo;
+    const distance = req.body.distance;
 
-    const errors: CustomValidationError = new CustomValidationError();
     try {
-        if (errors.errors.length > 0) {
-            res.status(422);
-            return next(errors);
-        }
-
-        await insertEdge(locationOne, locationTwo);
+        await insertEdge(locationOne, locationTwo, distance);
         return res
             .status(200)
-            .json({ message: 'Conneetion added successfully' });
+            .json({ message: 'Connection added successfully' });
     } catch (error) {
         return next(error);
     }

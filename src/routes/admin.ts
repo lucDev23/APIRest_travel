@@ -10,6 +10,8 @@ import {
 
 const router = express.Router();
 
+router.get('/test', adminController.testGraph);
+
 router.post('/trips', validateTripInputs, adminController.createTrip);
 
 router.put('/trips/:tripId' /*, adminController.editTrip */);

@@ -8,12 +8,27 @@ const tripSchema: Schema<ITrip> = new Schema({
     origin: { type: String, required: true },
     destination: { type: String, required: true },
     middleDestinations: [{ type: Schema.Types.ObjectId, ref: 'Location' }],
-    bus: { type: Schema.Types.ObjectId, ref: 'Bus', required: true },
+    busId: { type: Schema.Types.ObjectId, ref: 'Bus', required: true },
 });
 
 export const Trip = mongoose.model<ITrip>('Trip', tripSchema);
 
-export const validTrip = async (): Promise<Boolean> => {
-    //
-    return true;
+export const insertTrip = async (
+    departureDate: string,
+    arrivalDate: string,
+    origin: string,
+    destination: string,
+    middleDestinations: string[],
+    busId: string
+): Promise<ITrip> => {
+    const trip = new Trip({
+        departureDate: departureDate,
+        arrivalDate: arrivalDate,
+        origin: origin,
+        destination: destination,
+        middleDestinations: middleDestinations,
+        busId: busId,
+    });
+    await trip.save();
+    return trip;
 };

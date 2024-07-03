@@ -193,18 +193,18 @@ export const validateLocationsInputs = async (
             'Location name is required',
             'locationName'
         );
-    }
-
-    try {
-        if (await Location.exists({ name: locationName })) {
-            errors.addError(
-                locationName,
-                'Location name arredy exists',
-                'locationName'
-            );
+    } else {
+        try {
+            if (await Location.exists({ name: locationName })) {
+                errors.addError(
+                    locationName,
+                    'Location name arredy exists',
+                    'locationName'
+                );
+            }
+        } catch (error) {
+            return next(error);
         }
-    } catch (error) {
-        return next(error);
     }
 
     if (errors.errors.length > 0) {
@@ -224,56 +224,87 @@ export const validateConnectionInputs = async (
 ) => {
     const locationOne: string = validator.trim(req.body.locationOne || '');
     const locationTwo: string = validator.trim(req.body.locationTwo || '');
+    const distance: string = validator.trim(req.body.distance || '');
 
     const errors: CustomValidationError = new CustomValidationError();
 
     if (!locationOne) {
         errors.addError(locationOne, 'Location one is required', 'locationOne');
-    }
-
-    try {
-        if (locationOne && !(await Location.exists({ name: locationOne }))) {
-            errors.addError(
-                locationOne,
-                'Location one name does not exists',
-                'locationOne'
-            );
+    } else {
+        try {
+            if (!(await Location.exists({ name: locationOne }))) {
+                errors.addError(
+                    locationOne,
+                    'Location one name does not exists',
+                    'locationOne'
+                );
+            }
+        } catch (error) {
+            return next(error);
         }
-    } catch (error) {
-        return next(error);
     }
 
     if (!locationTwo) {
         errors.addError(locationTwo, 'Location two is required', 'locationTwo');
-    }
-
-    try {
-        if (locationTwo && !(await Location.exists({ name: locationTwo }))) {
-            errors.addError(
-                locationTwo,
-                'Location two name does not exists',
-                'locationTwo'
-            );
+    } else {
+        try {
+            if (!(await Location.exists({ name: locationTwo }))) {
+                errors.addError(
+                    locationTwo,
+                    'Location two name does not exists',
+                    'locationTwo'
+                );
+            }
+        } catch (error) {
+            return next(error);
         }
-    } catch (error) {
-        return next(error);
     }
 
-    try {
-        if (
-            await Edge.exists({
-                startLocation: locationOne,
-                endLocation: locationTwo,
-            })
-        ) {
+    if (!distance) {
+        errors.addError(
+            distance,
+            'Connection distance is required',
+            'distance'
+        );
+    } else {
+        try {
+            if (!validator.isNumeric(distance)) {
+                errors.addError(
+                    distance,
+                    'Connection distance must be a numeric value',
+                    'distance'
+                );
+            }
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    if (locationOne && locationTwo) {
+        if (locationOne === locationTwo) {
             errors.addError(
                 [locationOne, locationTwo],
-                'Connection between locations already exists',
+                'Location one must be different from location two',
                 'locationOne, locationTwo'
             );
+        } else {
+            try {
+                if (
+                    await Edge.exists({
+                        startLocation: locationOne,
+                        endLocation: locationTwo,
+                    })
+                ) {
+                    errors.addError(
+                        [locationOne, locationTwo],
+                        'Connection between locations already exists',
+                        'locationOne, locationTwo'
+                    );
+                }
+            } catch (error) {
+                return next(error);
+            }
         }
-    } catch (error) {
-        return next(error);
     }
 
     if (errors.errors.length > 0) {
@@ -283,6 +314,7 @@ export const validateConnectionInputs = async (
 
     req.body.locationOne = locationOne;
     req.body.locationTwo = locationTwo;
+    req.body.distance = distance;
 
     return next();
 };
@@ -293,23 +325,46 @@ export const validateBusInputs = async (
     next: NextFunction
 ) => {
     const busCapacity: string = validator.trim(req.body.busCapacity || '');
+    const actualLocation: string = validator.trim(
+        req.body.actualLocation || ''
+    );
 
     const errors: CustomValidationError = new CustomValidationError();
 
     if (!busCapacity) {
         errors.addError(busCapacity, 'Bus capacity is required', 'busCapacity');
+    } else {
+        try {
+            if (!validator.isNumeric(busCapacity)) {
+                errors.addError(
+                    busCapacity,
+                    'Bus capacity must be a numeric value',
+                    'busCapacity'
+                );
+            }
+        } catch (error) {
+            return next(error);
+        }
     }
 
-    try {
-        if (busCapacity && !validator.isNumeric(busCapacity)) {
-            errors.addError(
-                busCapacity,
-                'Bus capacity must be a numeric value',
-                'busCapacity'
-            );
+    if (!actualLocation) {
+        errors.addError(
+            actualLocation,
+            'Actual location is required',
+            'busCapacity'
+        );
+    } else {
+        try {
+            if (!(await Location.exists({ name: actualLocation }))) {
+                errors.addError(
+                    actualLocation,
+                    'Actual location two name does not exists',
+                    'actualLocation'
+                );
+            }
+        } catch (error) {
+            return next(error);
         }
-    } catch (error) {
-        return next(error);
     }
 
     if (errors.errors.length > 0) {
@@ -318,6 +373,7 @@ export const validateBusInputs = async (
     }
 
     req.body.busCapacity = Number(busCapacity);
+    req.body.actualLocation = actualLocation;
 
     return next();
 };
