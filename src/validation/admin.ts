@@ -3,11 +3,7 @@ import { Trip } from '../models/Trip';
 import { Request, Response, NextFunction } from 'express';
 import { CustomValidationError } from '../types/CustomValidationError';
 import validator from 'validator';
-import {
-    existsAllLocations,
-    existsLocation,
-    validateMiddleLocations,
-} from '../models/Location';
+import { existsLocation } from '../models/Location';
 import { validDate } from '../helpers/validDate';
 import { Location } from '../models/Location';
 import { Edge } from '../models/Edge';
@@ -28,10 +24,6 @@ export const validateTripInputs = async (
     const destination: string = validator.escape(
         validator.trim(req.body.destination || '')
     );
-
-    const middleDestinations: string[] = (
-        req.body.middleDestinations || []
-    ).map((location: string) => validator.escape(validator.trim(location)));
 
     const busId: string = validator.trim(req.body.busId || '');
 
@@ -77,41 +69,6 @@ export const validateTripInputs = async (
             'Origin must be different from destination',
             'origin'
         );
-    }
-
-    if (middleDestinations.length > 0) {
-        try {
-            const invalidLocations = await existsAllLocations(
-                middleDestinations
-            );
-            if (invalidLocations.length > 0) {
-                invalidLocations.forEach((location) => {
-                    errors.addError(
-                        middleDestinations[
-                            middleDestinations.indexOf(location)
-                        ],
-                        `Middle destination '${location}' is not a valid option`,
-                        'middleDestinations'
-                    );
-                });
-            }
-
-            if (
-                !(await validateMiddleLocations(
-                    origin,
-                    destination,
-                    middleDestinations
-                ))
-            ) {
-                errors.addError(
-                    middleDestinations,
-                    'Some Middle location is not connected',
-                    'middleLocations'
-                );
-            }
-        } catch (error) {
-            return next(error);
-        }
     }
 
     if (!departureDate) {
@@ -170,7 +127,6 @@ export const validateTripInputs = async (
 
     req.body.origin = origin;
     req.body.destination = destination;
-    req.body.middleDestinations = middleDestinations;
     req.body.departureDate = departureDate;
     req.body.arrivalDate = arrivalDate;
     req.body.busId = busId;

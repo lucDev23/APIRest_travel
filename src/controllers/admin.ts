@@ -19,13 +19,7 @@ export const testGraph = async (
     const graph = new LocationGraph();
     await graph.init();
     graph.print();
-    console.log(
-        await graph.findShortestPathWithIntermediates(
-            'Dolores',
-            'Montevideo',
-            []
-        )
-    );
+    // console.log(graph.shortestPath('Dolores', 'Montevideo'));
 
     res.json({ message: 'ok' });
 };
@@ -39,17 +33,9 @@ export const createTrip = async (
     const arrivalDate: string = req.body.arrivalDate;
     const origin: string = req.body.origin;
     const destination: string = req.body.destination;
-    const middleDestinations: string[] = req.body.middleDestinations;
     const busId: string = req.body.busId;
 
-    await insertTrip(
-        departureDate,
-        arrivalDate,
-        origin,
-        destination,
-        middleDestinations,
-        busId
-    );
+    await insertTrip(departureDate, arrivalDate, origin, destination, busId);
 
     return res.status(200).json({ message: 'Trip created successfully' });
 };

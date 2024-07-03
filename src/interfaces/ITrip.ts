@@ -5,6 +5,5 @@ export interface ITrip {
     arrivalDate: Date;
     origin: string;
     destination: string;
-    middleDestinations: Types.ObjectId[];
     busId: Types.ObjectId;
 }
