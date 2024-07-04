@@ -1,12 +1,13 @@
 import { Bus, existsBus } from '../models/Bus';
 import { Trip } from '../models/Trip';
 import { Request, Response, NextFunction } from 'express';
-import { CustomValidationError } from '../types/CustomValidationError';
+import { CustomError } from '../types/CustomError';
 import validator from 'validator';
 import { existsLocation } from '../models/Location';
 import { validDate } from '../helpers/validDate';
 import { Location } from '../models/Location';
 import { Edge } from '../models/Edge';
+import { LocationGraph } from '../types/LocationsGraph';
 
 export const validateTripInputs = async (
     req: Request,
@@ -25,9 +26,13 @@ export const validateTripInputs = async (
         validator.trim(req.body.destination || '')
     );
 
+    const middleDestinations: string[] = (
+        req.body.middleDestinations || []
+    ).map((location: string) => validator.escape(validator.trim(location)));
+
     const busId: string = validator.trim(req.body.busId || '');
 
-    const errors: CustomValidationError = new CustomValidationError();
+    const errors: CustomError = new CustomError();
 
     if (!origin) {
         errors.addError(origin, 'Origin is required', 'origin');
@@ -61,14 +66,6 @@ export const validateTripInputs = async (
         } catch (error) {
             return next(error);
         }
-    }
-
-    if (origin === destination) {
-        errors.addError(
-            origin,
-            'Origin must be different from destination',
-            'origin'
-        );
     }
 
     if (!departureDate) {
@@ -141,7 +138,7 @@ export const validateLocationsInputs = async (
 ) => {
     const locationName: string = validator.trim(req.body.locationName || '');
 
-    const errors: CustomValidationError = new CustomValidationError();
+    const errors: CustomError = new CustomError();
 
     if (!locationName) {
         errors.addError(
@@ -182,7 +179,7 @@ export const validateConnectionInputs = async (
     const locationTwo: string = validator.trim(req.body.locationTwo || '');
     const distance: string = validator.trim(req.body.distance || '');
 
-    const errors: CustomValidationError = new CustomValidationError();
+    const errors: CustomError = new CustomError();
 
     if (!locationOne) {
         errors.addError(locationOne, 'Location one is required', 'locationOne');
@@ -285,7 +282,7 @@ export const validateBusInputs = async (
         req.body.actualLocation || ''
     );
 
-    const errors: CustomValidationError = new CustomValidationError();
+    const errors: CustomError = new CustomError();
 
     if (!busCapacity) {
         errors.addError(busCapacity, 'Bus capacity is required', 'busCapacity');
@@ -307,14 +304,14 @@ export const validateBusInputs = async (
         errors.addError(
             actualLocation,
             'Actual location is required',
-            'busCapacity'
+            'actualLocation'
         );
     } else {
         try {
             if (!(await Location.exists({ name: actualLocation }))) {
                 errors.addError(
                     actualLocation,
-                    'Actual location two name does not exists',
+                    'Actual location name does not exists',
                     'actualLocation'
                 );
             }

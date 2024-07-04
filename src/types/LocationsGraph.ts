@@ -1,6 +1,5 @@
 import { Edge } from '../models/Edge';
 import { Location } from '../models/Location';
-import { PriorityQueue } from 'typescript-collections';
 
 interface AdjacencyMatrixCell {
     connected: number;
@@ -58,5 +57,51 @@ export class LocationGraph {
         this.graph.forEach((row) => {
             console.log(row.map((cell) => cell.connected));
         });
+    }
+
+    getWays(start: string, end: string): string[][] {
+        const startIdx = this.locationsMap.get(start);
+        const endIdx = this.locationsMap.get(end);
+
+        if (startIdx === undefined || endIdx === undefined) {
+            throw new Error(
+                'Start or end location does not exist in the graph'
+            );
+        }
+
+        const visited = new Array(this.graph.length).fill(false);
+        const paths: string[][] = [];
+        const path: string[] = [];
+
+        const dfs = (currentIdx: number, endIdx: number, path: string[]) => {
+            path.push(this.getLocationByIndex(currentIdx));
+            visited[currentIdx] = true;
+
+            if (currentIdx === endIdx) {
+                paths.push([...path]);
+            } else {
+                for (let i = 0; i < this.graph[currentIdx].length; i++) {
+                    if (this.graph[currentIdx][i].connected && !visited[i]) {
+                        dfs(i, endIdx, path);
+                    }
+                }
+            }
+
+            path.pop();
+            visited[currentIdx] = false;
+        };
+
+        dfs(startIdx, endIdx, path);
+
+        return paths;
+    }
+
+    private getLocationByIndex(index: number): string {
+        for (let [location, idx] of this.locationsMap.entries()) {
+            if (idx === index) {
+                return location;
+            }
+        }
+        throw new Error('Location index not found');
     }
 }

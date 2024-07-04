@@ -6,7 +6,7 @@ import adminRoutes from './routes/admin';
 import cors from 'cors';
 import passport from 'passport';
 import './config/passport';
-import { CustomValidationError } from './types/CustomValidationError';
+import { CustomError } from './types/CustomError';
 
 const app = express();
 
@@ -24,12 +24,7 @@ app.use('/admin', adminRoutes);
 // ERROR HANDLER
 
 app.use(
-    (
-        error: CustomValidationError,
-        req: Request,
-        res: Response,
-        next: NextFunction
-    ) => {
+    (error: CustomError, req: Request, res: Response, next: NextFunction) => {
         return res.json({ error: error.message, errors: error.errors });
     }
 );

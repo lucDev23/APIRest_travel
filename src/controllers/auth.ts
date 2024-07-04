@@ -3,7 +3,7 @@ import { Result, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
-import { CustomValidationError } from '../types/CustomValidationError';
+import { CustomError } from '../types/CustomError';
 
 const SECRET_KEY = 'secret_key';
 

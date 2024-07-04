@@ -1,11 +1,11 @@
-export class CustomValidationError extends Error {
+export class CustomError extends Error {
     errors: {
         value: string | string[] | undefined | null;
         msg: string;
         path: string;
     }[];
-    constructor() {
-        super('Validation error');
+    constructor(msg?: string | undefined) {
+        super(msg || 'Error');
         this.errors = [];
     }
 

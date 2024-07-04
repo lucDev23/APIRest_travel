@@ -7,6 +7,7 @@ const tripSchema: Schema<ITrip> = new Schema({
     arrivalDate: { type: Date, required: true },
     origin: { type: String, required: true },
     destination: { type: String, required: true },
+    middleLocations: [{ type: Schema.Types.ObjectId, ref: 'Location' }],
     busId: { type: Schema.Types.ObjectId, ref: 'Bus', required: true },
 });
 
@@ -17,6 +18,7 @@ export const insertTrip = async (
     arrivalDate: string,
     origin: string,
     destination: string,
+    middleLocations: string[],
     busId: string
 ): Promise<ITrip> => {
     const trip = new Trip({
@@ -24,6 +26,7 @@ export const insertTrip = async (
         arrivalDate: arrivalDate,
         origin: origin,
         destination: destination,
+        middleLocations: middleLocations,
         busId: busId,
     });
     await trip.save();

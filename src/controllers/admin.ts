@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 import { insertLocation, Location } from '../models/Location';
-import { CustomValidationError } from '../types/CustomValidationError';
+import { CustomError } from '../types/CustomError';
 import { Trip, insertTrip } from '../models/Trip';
 import { Edge, insertEdge } from '../models/Edge';
 import { insertBus } from '../models/Bus';
@@ -19,7 +19,7 @@ export const testGraph = async (
     const graph = new LocationGraph();
     await graph.init();
     graph.print();
-    // console.log(graph.shortestPath('Dolores', 'Montevideo'));
+    console.log(graph.getWays('Dolores', 'Colonia'));
 
     res.json({ message: 'ok' });
 };
@@ -33,9 +33,23 @@ export const createTrip = async (
     const arrivalDate: string = req.body.arrivalDate;
     const origin: string = req.body.origin;
     const destination: string = req.body.destination;
+    const middleLocations: string[] = req.body.middleLocations;
     const busId: string = req.body.busId;
 
-    await insertTrip(departureDate, arrivalDate, origin, destination, busId);
+    // const middleLocationsIds = (
+    //     await Location.find({ name: { $in: middleLocations } })
+    // ).map((e) => e._id);
+
+    // console.log(middleLocationsIds);
+
+    // await insertTrip(
+    //     departureDate,
+    //     arrivalDate,
+    //     origin,
+    //     destination,
+    //     middleLocations,
+    //     busId
+    // );
 
     return res.status(200).json({ message: 'Trip created successfully' });
 };
@@ -78,9 +92,34 @@ export const addBus = async (
     next: NextFunction
 ) => {
     try {
-        await insertBus(req.body.busCapacity);
+        const actualLocationId = await Location.find({
+            name: req.body.actualLocation,
+        });
+
+        await insertBus(req.body.busCapacity, actualLocationId[0]._id);
         return res.status(200).json({ message: 'Bus added successfully' });
     } catch (error) {
         return next(error);
+    }
+};
+
+export const getRoutes = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const origin: string = req.body.origin;
+    const destination: string = req.body.destination;
+
+    const graph = new LocationGraph();
+    graph.init();
+    const routes = graph.getWays(origin, destination);
+    if (routes.length === 0) {
+        const error = new CustomError('Not connected');
+        error.addError(
+            origin,
+            `There is no route connection between ${origin} and ${destination}`,
+            'origin'
+        );
     }
 };

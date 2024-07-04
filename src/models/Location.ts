@@ -1,6 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
 import { ILocation } from '../interfaces/ILocation';
-import { Edge } from './Edge';
 
 const locationSchema: Schema<ILocation> = new Schema({
     name: { type: String, required: true, unique: true },

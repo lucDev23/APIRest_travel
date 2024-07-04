@@ -1,10 +1,9 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 import { IBus } from '../interfaces/IBus';
-import { ITrip } from '../interfaces/ITrip';
 import { Trip } from './Trip';
 
 const busSchema: Schema<IBus> = new Schema({
-    capacity: { type: Number, required: true, unique: true },
+    capacity: { type: Number, required: true },
     actualLocation: {
         type: Schema.Types.ObjectId,
         ref: 'Location',
@@ -15,8 +14,11 @@ const busSchema: Schema<IBus> = new Schema({
 
 export const Bus = mongoose.model<IBus>('Bus', busSchema);
 
-export const insertBus = async (capacity: number): Promise<IBus> => {
-    const bus = new Bus({ capacity });
+export const insertBus = async (
+    capacity: number,
+    actualLocation: Types.ObjectId
+): Promise<IBus> => {
+    const bus = new Bus({ capacity, actualLocation });
     await bus.save();
     return bus;
 };
@@ -32,4 +34,8 @@ export const getOldestTrip = async (busId: string) => {
 };
 
 // FIX
-// export const availableBus = async (busId)
+export const availableBus = async (
+    busId: string,
+    departureDate: Date,
+    arrivalDate: Date
+) => {};
