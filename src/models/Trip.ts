@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { ITrip } from '../interfaces/ITrip';
 import { Request, Response, NextFunction } from 'express';
+import { Bus } from './Bus';
 
 const tripSchema: Schema<ITrip> = new Schema({
     departureDate: { type: Date, required: true },
@@ -30,5 +31,8 @@ export const insertTrip = async (
         busId: busId,
     });
     await trip.save();
+    const bus = await Bus.findById(busId);
+    await bus?.updateOne({ $push: { trips: trip._id } });
+    await bus?.save();
     return trip;
 };

@@ -42,14 +42,14 @@ export const createTrip = async (
 
     // console.log(middleLocationsIds);
 
-    // await insertTrip(
-    //     departureDate,
-    //     arrivalDate,
-    //     origin,
-    //     destination,
-    //     middleLocations,
-    //     busId
-    // );
+    await insertTrip(
+        departureDate,
+        arrivalDate,
+        origin,
+        destination,
+        middleLocations,
+        busId
+    );
 
     return res.status(200).json({ message: 'Trip created successfully' });
 };

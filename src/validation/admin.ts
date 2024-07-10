@@ -1,4 +1,4 @@
-import { Bus, existsBus } from '../models/Bus';
+import { availableBus, Bus, busInLocation, existsBus } from '../models/Bus';
 import { Trip } from '../models/Trip';
 import { Request, Response, NextFunction } from 'express';
 import { CustomError } from '../types/CustomError';
@@ -108,9 +108,30 @@ export const validateTripInputs = async (
         errors.addError(busId, 'Bus id is required', 'busId');
     } else {
         try {
-            const validBus = await existsBus(busId);
-            if (!validBus) {
+            const existBus = await existsBus(busId);
+            if (!existBus) {
                 errors.addError(busId, 'There is no bus with that id', 'busId');
+            } else {
+                const busLocated = await busInLocation(origin, busId);
+                if (!busLocated) {
+                    errors.addError(
+                        busId,
+                        `That bus is not locaded in ${origin}`,
+                        'busId'
+                    );
+                }
+                const validBus = await availableBus(
+                    busId,
+                    new Date(departureDate),
+                    new Date(arrivalDate)
+                );
+                if (!validBus) {
+                    errors.addError(
+                        busId,
+                        'That bus is not available at that time',
+                        'busId'
+                    );
+                }
             }
         } catch (error) {
             return next(error);
