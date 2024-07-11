@@ -1,7 +1,8 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { ObjectId, Schema } from 'mongoose';
 import { ITrip } from '../interfaces/ITrip';
 import { Request, Response, NextFunction } from 'express';
 import { Bus } from './Bus';
+import { Location } from './Location';
 
 const tripSchema: Schema<ITrip> = new Schema({
     departureDate: { type: Date, required: true },
@@ -22,12 +23,18 @@ export const insertTrip = async (
     middleLocations: string[],
     busId: string
 ): Promise<ITrip> => {
+    const middleLocationsIds = [];
+    for (const locationName of middleLocations) {
+        const locationId = await Location.findOne({ name: locationName });
+        middleLocationsIds.push(locationId);
+    }
+
     const trip = new Trip({
         departureDate: departureDate,
         arrivalDate: arrivalDate,
         origin: origin,
         destination: destination,
-        middleLocations: middleLocations,
+        middleLocations: middleLocationsIds,
         busId: busId,
     });
     await trip.save();

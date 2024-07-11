@@ -12,14 +12,6 @@ export const signup = async (
     res: Response,
     next: NextFunction
 ) => {
-    // const errors: Result = validationResult(req);
-
-    // if (!errors.isEmpty()) {
-    //     const error = new CustomValidationError(errors.array());
-    //     res.status(422);
-    //     return next(error);
-    // }
-
     const { email, password } = req.body as { email: string; password: string };
 
     try {
@@ -46,33 +38,27 @@ export const login = async (
     res: Response,
     next: NextFunction
 ) => {
-    // const errors: Result = validationResult(req);
-
-    // if (!errors.isEmpty()) {
-    //     const error = new CustomValidationError(errors.array());
-    //     res.status(422);
-    //     return next(error);
-    // }
-
     const { email, password } = req.body as { email: string; password: string };
 
     try {
         const user = await User.findOne({ email: email });
 
         if (!user) {
-            const error: Error = new Error(
-                'A user with this email could not be found.'
-            );
+            const errors: CustomError = new CustomError();
+
+            errors.addError(email, 'There is no user with that email', 'email');
             res.status(401);
-            return next(error);
+            return next(errors);
         }
 
         const passwordsMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordsMatch) {
-            const error: Error = new Error('Wrong password.');
+            const errors: CustomError = new CustomError();
+
+            errors.addError(password, 'Wrong password', 'password');
             res.status(401);
-            return next(error);
+            return next(errors);
         }
 
         const payload = { _id: user._id };

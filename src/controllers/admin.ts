@@ -36,22 +36,20 @@ export const createTrip = async (
     const middleLocations: string[] = req.body.middleLocations;
     const busId: string = req.body.busId;
 
-    // const middleLocationsIds = (
-    //     await Location.find({ name: { $in: middleLocations } })
-    // ).map((e) => e._id);
-
-    // console.log(middleLocationsIds);
-
-    await insertTrip(
-        departureDate,
-        arrivalDate,
-        origin,
-        destination,
-        middleLocations,
-        busId
-    );
-
-    return res.status(200).json({ message: 'Trip created successfully' });
+    try {
+        await insertTrip(
+            departureDate,
+            arrivalDate,
+            origin,
+            destination,
+            middleLocations,
+            busId
+        );
+        return res.status(200).json({ message: 'Trip created successfully' });
+    } catch (error) {
+        res.status(500);
+        return next(error);
+    }
 };
 
 export const addLocation = async (
@@ -63,6 +61,7 @@ export const addLocation = async (
         await insertLocation(req.body.locationName);
         return res.status(200).json({ message: 'Location added successfully' });
     } catch (error) {
+        res.status(500);
         return next(error);
     }
 };
@@ -82,6 +81,7 @@ export const connectLocations = async (
             .status(200)
             .json({ message: 'Connection added successfully' });
     } catch (error) {
+        res.status(500);
         return next(error);
     }
 };
@@ -99,6 +99,7 @@ export const addBus = async (
         await insertBus(req.body.busCapacity, actualLocationId[0]._id);
         return res.status(200).json({ message: 'Bus added successfully' });
     } catch (error) {
+        res.status(500);
         return next(error);
     }
 };

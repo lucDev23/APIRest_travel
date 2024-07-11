@@ -1,5 +1,4 @@
-import { availableBus, Bus, busInLocation, existsBus } from '../models/Bus';
-import { Trip } from '../models/Trip';
+import { availableBus, busInLocation, existsBus } from '../models/Bus';
 import { Request, Response, NextFunction } from 'express';
 import { CustomError } from '../types/CustomError';
 import validator from 'validator';
@@ -26,16 +25,18 @@ export const validateTripInputs = async (
         validator.trim(req.body.destination || '')
     );
 
-    const middleDestinations: string[] = (
-        req.body.middleDestinations || []
-    ).map((location: string) => validator.escape(validator.trim(location)));
+    const middleLocations: string[] = (req.body.middleLocations || []).map(
+        (location: string) => validator.escape(validator.trim(location))
+    );
 
     const busId: string = validator.trim(req.body.busId || '');
 
     const errors: CustomError = new CustomError();
+    let validLocations = true;
 
     if (!origin) {
         errors.addError(origin, 'Origin is required', 'origin');
+        validLocations = false;
     } else {
         try {
             const validOrigin = await existsLocation(origin);
@@ -45,6 +46,7 @@ export const validateTripInputs = async (
                     'Origin location is not a valid option',
                     'origin'
                 );
+                validLocations = false;
             }
         } catch (error) {
             return next(error);
@@ -62,9 +64,22 @@ export const validateTripInputs = async (
                     'Destination location is not a valid option',
                     'destination'
                 );
+                validLocations = false;
             }
         } catch (error) {
             return next(error);
+        }
+    }
+
+    if (middleLocations.length > 0 && validLocations) {
+        const graph: LocationGraph = new LocationGraph();
+        await graph.init();
+        if (!graph.validWay(origin, destination, middleLocations)) {
+            errors.addError(
+                middleLocations,
+                'Unknown route',
+                'middleLocations'
+            );
         }
     }
 
@@ -145,6 +160,7 @@ export const validateTripInputs = async (
 
     req.body.origin = origin;
     req.body.destination = destination;
+    req.body.middleLocations = middleLocations;
     req.body.departureDate = departureDate;
     req.body.arrivalDate = arrivalDate;
     req.body.busId = busId;
