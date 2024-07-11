@@ -332,6 +332,13 @@ export const validateBusInputs = async (
                     'busCapacity'
                 );
             }
+            if (Number(busCapacity) < 10 || Number(busCapacity) > 48) {
+                errors.addError(
+                    busCapacity,
+                    'Bus capacity must be between 10 and 48 seats',
+                    'busCapacity'
+                );
+            }
         } catch (error) {
             return next(error);
         }

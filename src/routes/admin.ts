@@ -12,7 +12,12 @@ const router = express.Router();
 
 router.get('/test', adminController.testGraph);
 
-router.post('/trips', validateTripInputs, adminController.createTrip);
+router.post(
+    '/trips',
+    /* passport.authenticate('jwt', { session: false }), */
+    validateTripInputs,
+    adminController.createTrip
+);
 
 router.put('/trips/:tripId' /*, adminController.editTrip */);
 
